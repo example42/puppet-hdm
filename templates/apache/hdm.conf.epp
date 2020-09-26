@@ -1,0 +1,22 @@
+# File managed by Puppet
+
+<VirtualHost *:<%= $::hdm::apache::port %>>
+    ServerName <%= $options['ServerName'] %>
+
+    DocumentRoot <%= $options['DocumentRoot'] %>
+    PassengerAppRoot <%= $options['PassengerAppRoot'] %>
+
+    PassengerDefaultRuby /opt/puppetlabs/puppet/bin/ruby
+    <Directory <%= $options['DocumentRoot'] %>>
+        AllowOverride all
+        Options -MultiViews
+    </Directory>
+    
+<% $options['passenger_env_vars'].each | $k , $v | { -%>
+    SetEnv <%= $k %> <%= $v %>;
+<% } -%>
+
+<% $options['extra_params'].each | $k , $v | { -%>
+    <%= $k %> <%= $v %>;
+<% } -%>    
+</VirtualHost>

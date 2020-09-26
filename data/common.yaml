@@ -1,1 +1,5 @@
---- {}
+---
+hdm::prereq::packages:
+  - gcc-c++
+  - sqlite-devel
+  - zlib-devel        

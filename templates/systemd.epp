@@ -1,0 +1,30 @@
+[Unit]
+Description=Passenger Standalone Application Server with HDM
+After=network.target
+ 
+[Service]
+Type=forking
+PrivateTmp=yes
+User=nginx
+Group=nginx
+WorkingDirectory=<%= $::hdm::hdm_dir %>
+#RuntimeDirectory=passenger
+#RuntimeDirectoryMode=0755
+PIDFile=/run/hdm.pid
+Environment="PATH=/opt/puppetlabs/puppet/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="GEM_HOME=/opt/puppetlabs/puppet/lib/ruby/vendor_gems/gems/"
+Environment="GEM_PATH=/opt/puppetlabs/puppet/lib/ruby/vendor_gems/gems/"
+Environment="PASSENGER_INSTANCE_REGISTRY_DIR=/run/passenger"
+<% $options['passenger_env_vars'].each | $k , $v | { -%>
+Environment="<%= $k %>=<%= $v %>"
+<% } -%>
+
+<% $options['extra_params'].each | $k , $v | { -%>
+<%= $k %>="<%= $v %>"
+<% } -%>  
+ExecStart="passenger start current --daemonize --instance-registry-dir /run/passenger --socket /run/passenger/hdm.sock --pid-file /run/passenger/hdm.pid --log-file /var/log/hdm/passenger.log --environment production --max-pool-size=16"
+ExecReload="passenger-config restart-app /apps/hdm"
+ExecStop="passenger stop --pid-file /run/passenger/hdm.pid"
+ 
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,20 @@
+# File managed by Puppet
+server {
+    listen <%= $options['listen'] %>;
+    server_name <%= $options['server_name'] %>;
+    root <%= $options['root'] %>;
+
+    # Turn on Passenger
+    passenger_enabled on;
+    passenger_ruby /opt/puppetlabs/puppet/bin/ruby;
+    passenger_friendly_error_pages <%= $options['passenger_friendly_error_pages'] %>;
+
+    # HDM env variables
+<% $options['passenger_env_vars'].each | $k , $v | { -%>
+    passenger_env_var <%= $k %> <%= $v %>;
+<% } -%>
+
+<% $options['extra_params'].each | $k , $v | { -%>
+    <%= $k %> <%= $v %>;
+<% } -%>
+}
