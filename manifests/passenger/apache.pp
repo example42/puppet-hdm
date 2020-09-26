@@ -11,7 +11,6 @@ class hdm::passenger::apache (
   Boolean $config_manage   = true,
   String $config_template  = 'hdm/apache/hdm.conf.epp',
   Hash $config_options     = {},
-  Integer $port            = 8042,
 ) {
 
   if $apache_package_manage {
@@ -30,7 +29,7 @@ class hdm::passenger::apache (
     $config_options_defaults = {
       'DocumentRoot' => "${::hdm::hdm_dir}/public",
       'PassengerAppRoot' => $::hdm::hdm_dir,
-      'ServerName' => "hdm.${facts['networking']['domain']}",
+      'ServerName' => $hdm::servername,
       'passenger_env_vars' => {
         'HDM__CONFIG_DIR' => '/etc/puppetlabs/code/environments',
         'HDM__PUPPET_DB__ENABLED' => true,

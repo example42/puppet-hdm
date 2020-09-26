@@ -9,14 +9,12 @@ class hdm::passenger::standalone (
   Boolean $passenger_package_manage = true,
 
   Boolean $config_manage   = true,
-  String $config_template  = '',
+  String $config_template  = 'hdm/Passengerfile.json.epp',
   Hash $config_options     = {},
 
   Boolean $systemd_manage   = true,
   String $systemd_config_template  = 'hdm/systemd.epp',
   Hash $systemd_config_options     = {},
-
-  Boolean $create_passenger_locations_fact = true,
 
 ) {
 
@@ -27,11 +25,13 @@ class hdm::passenger::standalone (
   }
   if $config_manage {
     $config_options_defaults = {
-      listen => '80 default_server',
-      root => "${hdm::hdm_dir}/public",
-      server_name => "hdm.${facts['networking']['domain']}",
-      passenger_friendly_error_pages => off,
-      passenger_env_vars => {
+      port => $::hdm::port,
+      environment => 'production',
+      socket => '/run/passenger/hdm.sock',
+      pid_file => '/run/passenger/hdm.pid',
+      log_file => '/var/log/hdm/passenger.log',
+      max_pool_size => 8,
+      envvars => {
         'HDM__CONFIG_DIR' => $::hdm::controlrepo_dir,
         'HDM__PUPPET_DB__ENABLED' => true,
         'HDM__PUPPET_DB__SELF_SIGNED_CERT' => true,
@@ -45,17 +45,16 @@ class hdm::passenger::standalone (
     $config_options_all = $config_options_defaults + $config_options
 
     if $config_template != '' or ! $config_template {
-      tp::conf { 'hdm::hdm.conf':
-        ensure   => $ensure,
-        base_dir => 'conf',
-        content  => epp($config_template, { options => $config_options_all }),
+      file { "${hdm::hdm_dir}/Passengerfile.json":
+        ensure  => $ensure,
+        content => epp($config_template, { options => $config_options_all }),
       }
     }
 
   }
 
+  # Systemd
   if $systemd_manage {
-
     $systemd_config_options_defaults = {
       root => "${hdm::hdm_dir}/public",
       server_name => "hdm.${facts['networking']['domain']}",
@@ -85,8 +84,15 @@ class hdm::passenger::standalone (
       before      => Service['passenger-hdm']
     }
     service { 'passenger-hdm':
-      enable => true,
       ensure => 'running',
+      enable => true,
+    }
+    file { '/var/log/hdm':
+      ensure => directory,
+      owner  => $::hdm::user,
+      group  => $::hdm::group,
     }
   }
+
+
 }

@@ -6,6 +6,10 @@
 #   include hdm
 class hdm (
   Optional[Variant[Sensitive,String[1]]] $puppetdb_token = undef,
+
+  String $servername = $facts['networking']['fqdn'],
+  Integer $port      = 8042,
+
   String $puppetdb_server = 'localhost',
   Integer $puppetdb_port  = 8081,
 
@@ -19,6 +23,12 @@ class hdm (
 
   String $controlrepo_git_source = 'https://github.com/example42/psick',
   StdLib::AbsolutePath $controlrepo_dir = '/etc/hdm/code',
+
+  Boolean $user_manage             = true,
+  String $user                     = 'hdm',
+  String $group                    = 'hdm',
+  Hash $user_options               = {},
+  Hash $group_options              = {},
 
 ) {
 
@@ -52,4 +62,14 @@ class hdm (
     }
   }
 
+  if $user_manage {
+    user { $user:
+      ensure => $ensure,
+      * => $user_options,
+    }
+    group { $group:
+      ensure => $ensure,
+      * => $group_options,
+    }
+  }
 }

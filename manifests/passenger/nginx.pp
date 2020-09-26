@@ -39,9 +39,9 @@ class hdm::passenger::nginx (
   }
   if $config_manage {
     $config_options_defaults = {
-      listen => '80 default_server',
+      listen => "${hdm::port} default_server",
       root => "${hdm::hdm_dir}/public",
-      server_name => "hdm.${facts['networking']['domain']}",
+      server_name => $hdm::servername,
       passenger_friendly_error_pages => off,
       passenger_env_vars => {
         'HDM__CONFIG_DIR' => $::hdm::controlrepo_dir,

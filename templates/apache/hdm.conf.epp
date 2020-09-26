@@ -1,6 +1,6 @@
 # File managed by Puppet
 
-<VirtualHost *:<%= $::hdm::apache::port %>>
+<VirtualHost *:<%= $::hdm::port %>>
     ServerName <%= $options['ServerName'] %>
 
     DocumentRoot <%= $options['DocumentRoot'] %>
