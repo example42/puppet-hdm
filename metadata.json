@@ -2,11 +2,18 @@
   "name": "example42-hdm",
   "version": "0.1.0",
   "author": "Alessandro Franceschi",
-  "summary": "",
+  "summary": "This module installs the full stack need to serve Hiera Data Managed (HDM)",
   "license": "Apache-2.0",
-  "source": "",
+  "source": "https://github.com/example42/puppet-hdm",
   "dependencies": [
-
+    {
+      "name": "puppetlabs/stdlib",
+      "version_requirement": ">= 3.2.0 < 8.0.0"
+    },
+    {
+      "name": "example42/tp",
+      "version_requirement": ">= 2.0.3 < 4.0.0"
+    }
   ],
   "operatingsystem_support": [
     {
@@ -49,7 +56,7 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 4.10.0 < 7.0.0"
+      "version_requirement": ">= 4.10.0 < 8.0.0"
     }
   ],
   "pdk-version": "1.18.1",

@@ -8,7 +8,7 @@ PrivateTmp=yes
 User=<%= $::hdm::user %>
 Group=<%= $::hdm::group %>
 WorkingDirectory=<%= $::hdm::hdm_dir %>
-PIDFile="/run/passenger/hdm.pid"
+PIDFile="/run/passenger.pid"
 Environment="PATH=/opt/puppetlabs/puppet/bin:/usr/local/bin:/usr/bin:/bin"
 Environment="GEM_HOME=/opt/puppetlabs/puppet/lib/ruby/vendor_gems/gems/"
 Environment="GEM_PATH=/opt/puppetlabs/puppet/lib/ruby/vendor_gems/gems/"

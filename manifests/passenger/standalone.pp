@@ -16,6 +16,7 @@ class hdm::passenger::standalone (
   String $systemd_config_template  = 'hdm/systemd.epp',
   Hash $systemd_config_options     = {},
 
+  Hash $envars               = {},
 ) {
 
   if $passenger_package_manage {
@@ -31,20 +32,14 @@ class hdm::passenger::standalone (
       pid_file => '/run/passenger/hdm.pid',
       log_file => '/var/log/hdm/passenger.log',
       max_pool_size => 8,
-      envvars => {
-        'HDM__CONFIG_DIR' => $::hdm::controlrepo_dir,
-        'HDM__PUPPET_DB__ENABLED' => true,
-        'HDM__PUPPET_DB__SELF_SIGNED_CERT' => true,
-        'HDM__PUPPET_DB__TOKEN'  => $::hdm::puppetdb_token,
-        'HDM__PUPPET_DB__SERVER' => "https://${::hdm::puppetdb_host}:${::hdm::puppetdb_port}",
-        'PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/puppetlabs/puppet/bin',
-        'RAILS_ENV' => 'production',
-      },
+      envvars =>  {
+        'PATH' => '/opt/puppetlabs/puppet/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin',
+      } + $::hdm::env_vars,
       extra_params => {},
     }
     $config_options_all = $config_options_defaults + $config_options
 
-    if $config_template != '' or ! $config_template {
+    if $config_template != '' {
       file { "${hdm::hdm_dir}/Passengerfile.json":
         ensure  => $ensure,
         content => epp($config_template, { options => $config_options_all }),
@@ -60,14 +55,9 @@ class hdm::passenger::standalone (
       server_name => "hdm.${facts['networking']['domain']}",
       passenger_friendly_error_pages => off,
       passenger_env_vars => {
-        'HDM__CONFIG_DIR' => $::hdm::controlrepo_dir,
-        'HDM__PUPPET_DB__ENABLED' => true,
-        'HDM__PUPPET_DB__SELF_SIGNED_CERT' => true,
-        'HDM__PUPPET_DB__TOKEN'  => $::hdm::puppetdb_token,
-        'HDM__PUPPET_DB__SERVER' => "https://${::hdm::puppetdb_host}:${::hdm::puppetdb_port}",
         'PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/puppetlabs/puppet/bin',
         'RAILS_ENV' => 'production',
-      },
+      } + $::hdm::env_vars,
       extra_params => {},
     }
     $systemd_config_options_all = $systemd_config_options_defaults + $systemd_config_options
@@ -93,6 +83,4 @@ class hdm::passenger::standalone (
       group  => $::hdm::group,
     }
   }
-
-
 }

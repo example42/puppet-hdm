@@ -31,14 +31,9 @@ class hdm::passenger::apache (
       'PassengerAppRoot' => $::hdm::hdm_dir,
       'ServerName' => $hdm::servername,
       'passenger_env_vars' => {
-        'HDM__CONFIG_DIR' => '/etc/puppetlabs/code/environments',
-        'HDM__PUPPET_DB__ENABLED' => true,
-        'HDM__PUPPET_DB__SELF_SIGNED_CERT' => true,
-        'HDM__PUPPET_DB__TOKEN'  => $::hdm::puppetdb_token,
-        'HDM__PUPPET_DB__SERVER' => "https://${::hdm::puppetdb_host}:${::hdm::puppetdb_port}",
         'PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/puppetlabs/puppet/bin',
         'RAILS_ENV' => 'production',
-      },
+      } + $::hdm::env_vars,
       extra_params => {},
     }
     $config_options_all = $config_options_defaults + $config_options

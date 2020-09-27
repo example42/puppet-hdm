@@ -48,6 +48,7 @@ class hdm::prereq (
       command => '/opt/puppetlabs/puppet/bin/bundle exec yarn install --check-files',
       require => [Tp::Install['yarn'],Tp::Dir['hdm']],
       cwd     => $::hdm::hdm_dir,
+      creates => "${::hdm::hdm_dir}/node_modules",
     }
   }
 }

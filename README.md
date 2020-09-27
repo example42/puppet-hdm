@@ -1,10 +1,16 @@
 # hdm
 
-Welcome to your new module. A short overview of the generated parts can be found
-in the [PDK documentation][1].
+This module manages the installation of Hiera Data Manager (HDM) on a node.
 
-The README template below provides a starting point with details about what
-information to include in your README.
+Being HDM a Rails application, the modules optionally takes cares of all the dependencies and configurations needed to have a web server serving HDM:
+- Packages prerequisites to compile
+- Installation of HDM from upstream git repo on GitHub
+- Deployment via r10k of a given Puppet control-repo
+- HDM's gem prerequisites, via execution of bundle install
+- Nodejs installation and execution of yarn install
+- Passenger as Application Server, standalone or with Apache or Nginx support
+
+Each of these corollary but necessary configurations can be skipped and managed with custom alternative classes.
 
 ## Table of Contents
 
@@ -19,99 +25,83 @@ information to include in your README.
 
 ## Description
 
-Briefly tell users why they might want to use your module. Explain what your
-module does and what kind of problems users can solve with it.
+HDM is a Web application use to discover, analyse and modify Hiera data.
 
-This should be a fairly short description helps the user decide if your module
-is what they want.
+It relies on an standard control-repo structure with Hiera data in Yaml files.
+
+This modules takes care of whatever is necessary to have HDM served on a node.
+
+In order to avoid too many other dependencies, it relies just on Tiny Puppet (tp) to install and configure all the necessary applications, like passenger, nodejs, yarn, nginx, apache...
+
+It's always possible, via the relevant parameter called $<something>_manage, to avoid to manage in the hdm module these third party applications. It's then left to the user to configure them as needed using other modules or custom code.
+
 
 ## Setup
 
-### What hdm affects **OPTIONAL**
+### What hdm affects
 
-If it's obvious what your module touches, you can skip this section. For
-example, folks can probably figure out that your mysql_instance module affects
-their MySQL instances.
+The module can manage:
 
-If there's more that they should know about, though, this is the place to
-mention:
+* All the necessary prerequisites for packages via the default hdm::prereq class. It's possible to specify an alternative class or just to skip the incusion on any class, passing as value an empty string:
 
-* Files, packages, services, or operations that the module will alter, impact,
-  or execute.
-* Dependencies that your module automatically installs.
-* Warnings or other important notices.
+        hdm::prerequisites_class: ''
 
-### Setup Requirements **OPTIONAL**
+Default value is:
 
-If your module requires anything extra before setting up (pluginsync enabled,
-another module, etc.), mention it here.
+        hdm::prerequisites_class: hdm::prereq
 
-If your most recent release breaks compatibility or requires particular steps
-for upgrading, you might want to include an additional "Upgrading" section here.
+* Passenger application server configured to serve the HDM rails app. The module provides (to test on different OS) profiles to use Passenger with Apache, Nginx or standalone, set via Hiera one of these or provide your own class:
+
+        hdm::webapp_class: hdm::passenger::apache
+        hdm::webapp_class: hdm::passenger::nginx
+        hdm::webapp_class: hdm::passenger::standalone
+
+* Installation of HDM app via git, using tp::dir and the vcsrepo module. By default this is enabled, with these values:
+
+        hdm::hdm_manage: true
+        hdm::hdm_git_source: 'https://github.com/example42/hdm'
+        hdm::hdm_dir: /opt/hdm
+
+* Installation via git of a control-repo configured with hdm::controlrepo_git_source to a local directory (hdm::controlrepo_dir). Use an empty value to not clone anything. r10k deploy puppetfile is then executed to retrive external modules. Default values are:
+
+        hdm::controlrepo_manage: true
+        hdm::controlrepo_git_source: 'https://github.com/example42/psick'
+        hdm::controlrepo_dir: '/etc/hdm/code'
+
+* Eventual creation of an hdm user and group. Any parameter of the user and group resources can be customized:
+
+        hdm::user_manage = true,
+        hdm::user: 'hdm'
+        hdm::group: 'hdm'
+        hdm::user_params: {}
+        hdm::group_params: {}
+
+### Setup Requirements
+
+This module has the following dependencies:
+
+* Puppet's stdlib module
+* example42 tp module (with depends on example42-tinydata and puppet-vcsrepo module)
+
+HDM needs to access to PuppetDB, either with the existing Puppet certificate (the certificate used by the hdm server must be whitelisted on PuppetDB) or with tokens to access Puppet Enteprise Console.
 
 ### Beginning with hdm
 
-The very basic steps needed for a user to get the module up and running. This
-can include setup steps, if necessary, or it can be an example of the most basic
-use of the module.
+The default behaviour of the module is to (try to) install on any RedHat, Debian and SUSe derivatives, and on MacOS, a web server serving HDM using data from a local directory and a configurable PuppetDB server.
 
 ## Usage
 
-Include usage examples for common use cases in the **Usage** section. Show your
-users how to use your module to solve problems, and be sure to include code
-examples. Include three to five examples of the most important or common tasks a
-user can accomplish with your module. Show users how to accomplish more complex
-tasks that involve different types, classes, and functions working in tandem.
+To install and configure the full stack in order to have HDM accessible on port 8042 just inlcude the hdm class.
 
-## Reference
+        include hdm
 
-This section is deprecated. Instead, add reference information to your code as
-Puppet Strings comments, and then use Strings to generate a REFERENCE.md in your
-module. For details on how to add code comments and generate documentation with
-Strings, see the [Puppet Strings documentation][2] and [style guide][3].
-
-If you aren't ready to use Strings yet, manually create a REFERENCE.md in the
-root of your module directory and list out each of your module's classes,
-defined types, facts, functions, Puppet tasks, task plans, and resource types
-and providers, along with the parameters for each.
-
-For each element (class, defined type, function, and so on), list:
-
-* The data type, if applicable.
-* A description of what the element does.
-* Valid values, if the data type doesn't make it obvious.
-* Default value, if any.
-
-For example:
-
-```
-### `pet::cat`
-
-#### Parameters
-
-##### `meow`
-
-Enables vocalization in your cat. Valid options: 'string'.
-
-Default: 'medium-loud'.
-```
 
 ## Limitations
 
-In the Limitations section, list any incompatibilities, known issues, or other
-warnings.
+The module is not fully tested on the ortogonal combinations of:
 
-## Development
+* Operating Systems potentially supported: RedHat, Debian and Suse derivatives, MacOS
+* Standalone installation modes: nginx, apache, standalone
+* Passenger, Ruby, Rails, Nodejs versions
 
-In the Development section, tell other users the ground rules for contributing
-to your project and how they should submit their work.
-
-## Release Notes/Contributors/Etc. **Optional**
-
-If you aren't using changelog, put your release notes here (though you should
-consider using changelog). You can also add any additional sections you feel are
-necessary or important to include here. Please use the `##` header.
-
-[1]: https://puppet.com/docs/pdk/latest/pdk_generating_modules.html
-[2]: https://puppet.com/docs/puppet/latest/puppet_strings.html
-[3]: https://puppet.com/docs/puppet/latest/puppet_strings_style.html
+We expect things not to work completely for various cases.

@@ -1,6 +1,6 @@
 {
 <% $options.each | $k , $v | { -%>
-    "<%= $k %>": "<%= $v %>",
+    <%= $k %>: <%= $v %>,
 <% } -%>
-    "start_timeout": 120
+    start_timeout: 120
 }
