@@ -5,6 +5,8 @@
 
     DocumentRoot <%= $options['DocumentRoot'] %>
     PassengerAppRoot <%= $options['PassengerAppRoot'] %>
+    PassengerUser <%= $::hdm::user %>
+    PassengerGroup <%= $::hdm::group %>
 
     PassengerDefaultRuby /opt/puppetlabs/puppet/bin/ruby
     <Directory <%= $options['DocumentRoot'] %>>

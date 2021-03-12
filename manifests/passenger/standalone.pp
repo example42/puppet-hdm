@@ -32,17 +32,20 @@ class hdm::passenger::standalone (
       pid_file => '/run/passenger/hdm.pid',
       log_file => '/var/log/hdm/passenger.log',
       max_pool_size => 8,
-      envvars =>  {
-        'PATH' => '/opt/puppetlabs/puppet/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin',
-      } + $::hdm::env_vars,
+      envvars => $::hdm::env_vars,
       extra_params => {},
     }
     $config_options_all = $config_options_defaults + $config_options
 
     if $config_template != '' {
+      $passengerfile_require = $::hdm::hdm_manage ? {
+        true  => Tp::Install['hdm'],
+        false => undef,
+      }
       file { "${hdm::hdm_dir}/Passengerfile.json":
         ensure  => $ensure,
         content => epp($config_template, { options => $config_options_all }),
+        require => $passengerfile_require,
       }
     }
 

@@ -1,0 +1,5 @@
+---
+hdm::prereq::packages:
+  - build-essential
+  - libsqlite3-dev
+  - zlib1g-dev

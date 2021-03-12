@@ -30,11 +30,8 @@ class hdm::passenger::apache (
       'DocumentRoot' => "${::hdm::hdm_dir}/public",
       'PassengerAppRoot' => $::hdm::hdm_dir,
       'ServerName' => $hdm::servername,
-      'passenger_env_vars' => {
-        'PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/puppetlabs/puppet/bin',
-        'RAILS_ENV' => 'production',
-      } + $::hdm::env_vars,
-      extra_params => {},
+      'passenger_env_vars' => $::hdm::env_vars,
+      'extra_params' => {},
     }
     $config_options_all = $config_options_defaults + $config_options
 

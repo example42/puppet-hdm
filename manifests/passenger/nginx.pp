@@ -26,10 +26,13 @@ class hdm::passenger::nginx (
 
   if $nginx_package_manage {
     tp::install { 'nginx':
-      ensure        => $ensure,
-      settings_hash => $tp_nginx_settings,
-      test_enable   => false,
-      cli_enable    => false,
+      ensure         => $ensure,
+      settings_hash  => $tp_nginx_settings,
+      test_enable    => false,
+      cli_enable     => false,
+      tp_repo_params => {
+        yum_gpgcheck => false,
+      }
     }
   }
   if $passenger_package_manage {
@@ -43,10 +46,7 @@ class hdm::passenger::nginx (
       root => "${hdm::hdm_dir}/public",
       server_name => $hdm::servername,
       passenger_friendly_error_pages => off,
-      passenger_env_vars => {
-        'PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/puppetlabs/puppet/bin',
-        'RAILS_ENV' => 'production',
-      } + $::hdm::env_vars,
+      passenger_env_vars => $::hdm::env_vars,
       extra_params => {},
     }
     $config_options_all = $config_options_defaults + $config_options

@@ -8,6 +8,8 @@ server {
     passenger_enabled on;
     passenger_ruby /opt/puppetlabs/puppet/bin/ruby;
     passenger_friendly_error_pages <%= $options['passenger_friendly_error_pages'] %>;
+    passenger_user <%= $::hdm::user %>;
+    passenger_group <%= $::hdm::group %>;
 
     # HDM env variables
 <% $options['passenger_env_vars'].each | $k , $v | { -%>
